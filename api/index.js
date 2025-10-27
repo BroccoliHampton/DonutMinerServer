@@ -1,18 +1,16 @@
 //
-// FINALIZED content for api/index.js (v3 - Cache Busting & Link)
+// FINALIZED content for api/index.js (v4 - Cache Busting & Full Link Embed)
 //
 module.exports = async function handler(req, res) {
-  console.log("[v3] /api/index called (Embed Link)");
+  console.log("[v4] /api/index called (Embed Link)");
 
   try {
-    // NOTE: Ensure your Vercel project environment variables are set for these.
     const GAME_URL = process.env.GAME_URL || "https://your-donut-miner-url.com"
     const START_IMAGE_URL = process.env.START_IMAGE_URL || "https://i.imgur.com/IsUWL7j.png"
     
     // 1. Define the Mini App Embed Structure
     const miniAppEmbed = {
       version: "1",
-      // Use the launch action type to immediately open your game URL.
       imageUrl: START_IMAGE_URL,
       aspectRatio: "3:2", 
       button: {
@@ -50,14 +48,14 @@ module.exports = async function handler(req, res) {
 
     // 2. Set Headers to Prevent Caching
     res.setHeader("Content-Type", "text/html; charset=utf-8")
-    // Use aggressive headers to ensure the Farcaster scraper/CDN pulls the latest version
+    // Use the most aggressive combination to bypass Vercel's default caching (which is priority 1.1)
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
-    res.setHeader("CDN-Cache-Control", "no-store") // Tell Vercel's CDN not to cache
+    res.setHeader("CDN-Cache-Control", "no-store") 
     
     res.status(200).send(html)
 
   } catch (e) {
-    console.error("[v3] Error in /api/index:", e.message)
+    console.error("[v4] Error in /api/index:", e.message)
     res.status(500).send(`Error: ${e.message}`)
   }
 }
