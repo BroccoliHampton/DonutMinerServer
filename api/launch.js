@@ -1,22 +1,17 @@
 //
-// FINALIZED content for api/index.js (v6 - CRITICAL CRASH FIX)
+// FINALIZED content for api/launch.js (v7 - POST-MORTEM FIX)
 //
 module.exports = async function handler(req, res) {
-  console.log("[v6] /api/index called (Crash Fix)");
+  console.log("[v7] /api/launch called (POST-MORTEM FIX)");
 
   try {
-    // CRITICAL: Ensure these fallback to safe strings if the environment variables are missing.
-    // If these are null/undefined, the JSON.stringify call *will* fail.
     const GAME_URL = process.env.GAME_URL || "https://placeholder.vercel.app/donut-miner";
     const START_IMAGE_URL = process.env.START_IMAGE_URL || "https://i.imgur.com/IsUWL7j.png";
     
-    // Check for null values immediately before processing
     if (GAME_URL.includes("placeholder")) {
-        console.error("[v6] ERROR: GAME_URL environment variable is missing in Vercel settings.");
-        // We still attempt to proceed but console the error
+        console.error("[v7] FATAL ERROR: GAME_URL environment variable is missing.");
     }
 
-    // 1. Define the Mini App Embed Structure as a JS object
     const miniAppEmbedObject = {
       version: "1",
       imageUrl: START_IMAGE_URL,
@@ -25,15 +20,13 @@ module.exports = async function handler(req, res) {
         title: "Launch Donut Miner ツ",
         action: {
           type: "link", 
-          url: GAME_URL, 
+          url: GAME_URL, // Ensure this points to your deployed frontend index.html
         },
       },
     }
 
-    // 2. Stringify the ENTIRE object
     const serializedEmbed = JSON.stringify(miniAppEmbedObject);
 
-    // 3. Construct the HTML
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -56,16 +49,16 @@ module.exports = async function handler(req, res) {
 </body>
 </html>`
 
-    // 4. Set Headers 
     res.setHeader("Content-Type", "text/html; charset=utf-8")
+    // Keep aggressive headers
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
     res.setHeader("CDN-Cache-Control", "no-store") 
     
     res.status(200).send(html)
 
   } catch (e) {
-    console.error("[v6] FATAL SERVER CRASH in /api/index:", e);
-    // If we catch a crash, return 500 to the client
-    res.status(500).send(`Server Error: Failed to render embed. Check Vercel logs for missing environment variables or syntax issues.`);
+    console.error("[v7] FATAL SERVER CRASH in /api/launch:", e);
+    // Even though Vercel reported 200, returning a proper response here is best practice
+    res.status(500).send(`Server Error: Embed launch failed. Fatal server error caught.`);
   }
 }
